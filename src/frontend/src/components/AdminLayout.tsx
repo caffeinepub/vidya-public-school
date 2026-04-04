@@ -1,7 +1,6 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useApp } from "@/context/AppContext";
 import { cn } from "@/lib/utils";
 import type { UserRole } from "@/types";
@@ -16,11 +15,13 @@ import {
   ClipboardList,
   CreditCard,
   FileText,
+  FolderOpen,
   Layers,
   LayoutDashboard,
   LogOut,
   Megaphone,
   Menu,
+  MessageSquare,
   Receipt,
   Search,
   UserCog,
@@ -96,6 +97,24 @@ const NAV_ITEMS: NavItem[] = [
     href: "/attendance",
     icon: CalendarCheck,
     roles: ["superAdmin", "admin", "teacher"],
+  },
+  {
+    label: "Homework",
+    href: "/homework",
+    icon: ClipboardList,
+    roles: ["superAdmin", "admin", "teacher"],
+  },
+  {
+    label: "Remarks",
+    href: "/remarks",
+    icon: MessageSquare,
+    roles: ["superAdmin", "admin", "teacher"],
+  },
+  {
+    label: "Documents",
+    href: "/documents",
+    icon: FolderOpen,
+    roles: ["superAdmin", "admin"],
   },
   {
     label: "Notices",

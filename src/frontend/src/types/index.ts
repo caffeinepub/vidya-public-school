@@ -87,7 +87,7 @@ export interface FeePayment {
   amount: number;
   discount?: number;
   fine?: number;
-  paymentMode: "cash" | "cheque" | "online";
+  paymentMode: "cash" | "cheque" | "online" | "upi" | "card";
   balance?: number;
   remarks?: string;
 }
@@ -108,6 +108,39 @@ export interface DashboardStats {
   pendingDues: number;
 }
 
+export interface Homework {
+  homeworkId: string;
+  className: string;
+  section: string;
+  subject: string;
+  title: string;
+  description: string;
+  dueDate: string;
+  postedBy: string;
+}
+
+export interface TeacherRemark {
+  remarkId: string;
+  studentAdmissionNumber: string;
+  term: string;
+  remarkText: string;
+  postedBy: string;
+  date: string;
+}
+
+export interface StudentDocument {
+  docId: string;
+  studentAdmissionNumber: string;
+  title: string;
+  type:
+    | "TC"
+    | "ID Card"
+    | "Character Certificate"
+    | "Fee Receipt"
+    | "Report Card";
+  dateIssued: string;
+}
+
 export type UserRole =
   | "superAdmin"
   | "admin"
@@ -120,4 +153,5 @@ export interface UserSession {
   name: string;
   role: UserRole;
   empId?: string;
+  admissionNumber?: string;
 }

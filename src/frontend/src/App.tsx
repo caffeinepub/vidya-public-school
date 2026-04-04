@@ -25,25 +25,37 @@ import LoginPage from "@/pages/LoginPage";
 import AttendancePage from "@/pages/admin/AttendancePage";
 import ClassesPage from "@/pages/admin/ClassesPage";
 import DashboardPage from "@/pages/admin/DashboardPage";
+import DocumentsManagePage from "@/pages/admin/DocumentsManagePage";
 import EmployeeFormPage from "@/pages/admin/EmployeeFormPage";
 import EmployeeProfilePage from "@/pages/admin/EmployeeProfilePage";
 import EmployeesPage from "@/pages/admin/EmployeesPage";
 import ExamsPage from "@/pages/admin/ExamsPage";
 import FeesPage from "@/pages/admin/FeesPage";
+import HomeworkManagePage from "@/pages/admin/HomeworkManagePage";
 import MarksPage from "@/pages/admin/MarksPage";
 import MySalaryPage from "@/pages/admin/MySalaryPage";
 import NoticesManagePage from "@/pages/admin/NoticesManagePage";
+import RemarksManagePage from "@/pages/admin/RemarksManagePage";
 import ReportsPage from "@/pages/admin/ReportsPage";
 import SalaryPage from "@/pages/admin/SalaryPage";
 import StudentFormPage from "@/pages/admin/StudentFormPage";
 import StudentProfilePage from "@/pages/admin/StudentProfilePage";
 import StudentsPage from "@/pages/admin/StudentsPage";
+import StudentPortal from "@/pages/student/StudentPortal";
 import { sessionStore } from "@/utils/sessionStore";
 
-// Auth guard -- uses the module-level sessionStore so it works
-// even in sandboxed environments where localStorage is blocked.
+// Auth guard for staff -- redirects students to /student-portal
 function requireAuth() {
-  if (!sessionStore.get()) throw redirect({ to: "/login" });
+  const session = sessionStore.get();
+  if (!session) throw redirect({ to: "/login" });
+  if (session.role === "student") throw redirect({ to: "/student-portal" });
+}
+
+// Auth guard for student portal -- redirects non-students to /dashboard
+function requireStudentAuth() {
+  const session = sessionStore.get();
+  if (!session) throw redirect({ to: "/login" });
+  if (session.role !== "student") throw redirect({ to: "/dashboard" });
 }
 
 // Root route
@@ -113,7 +125,15 @@ const loginRoute = createRoute({
   component: LoginPage,
 });
 
-// Private routes (auth-gated)
+// Student portal route
+const studentPortalRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/student-portal",
+  beforeLoad: requireStudentAuth,
+  component: StudentPortal,
+});
+
+// Private routes (auth-gated, staff only)
 const dashboardRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/dashboard",
@@ -254,6 +274,27 @@ const mySalaryRoute = createRoute({
   component: MySalaryPage,
 });
 
+const homeworkManageRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/homework",
+  beforeLoad: requireAuth,
+  component: HomeworkManagePage,
+});
+
+const remarksManageRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/remarks",
+  beforeLoad: requireAuth,
+  component: RemarksManagePage,
+});
+
+const documentsManageRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/documents",
+  beforeLoad: requireAuth,
+  component: DocumentsManagePage,
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   aboutRoute,
@@ -266,6 +307,7 @@ const routeTree = rootRoute.addChildren([
   privacyRoute,
   termsRoute,
   loginRoute,
+  studentPortalRoute,
   dashboardRoute,
   studentsRoute,
   studentsNewRoute,
@@ -286,6 +328,9 @@ const routeTree = rootRoute.addChildren([
   reportsRoute,
   salaryRoute,
   mySalaryRoute,
+  homeworkManageRoute,
+  remarksManageRoute,
+  documentsManageRoute,
 ]);
 
 const router = createRouter({ routeTree });

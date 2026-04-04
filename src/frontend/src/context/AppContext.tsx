@@ -2,11 +2,14 @@ import { type ReactNode, createContext, useContext, useState } from "react";
 import {
   SAMPLE_ATTENDANCE,
   SAMPLE_CLASSES,
+  SAMPLE_DOCUMENTS,
   SAMPLE_EMPLOYEES,
   SAMPLE_EXAMS,
   SAMPLE_FEE_PAYMENTS,
+  SAMPLE_HOMEWORK,
   SAMPLE_MARKS,
   SAMPLE_NOTICES,
+  SAMPLE_REMARKS,
   SAMPLE_SALARY_RECORDS,
   SAMPLE_STUDENTS,
 } from "../data/sampleData";
@@ -16,10 +19,13 @@ import type {
   Employee,
   Exam,
   FeePayment,
+  Homework,
   Notice,
   SalaryRecord,
   Student,
+  StudentDocument,
   StudentMark,
+  TeacherRemark,
   UserSession,
 } from "../types";
 import { sessionStore } from "../utils/sessionStore";
@@ -35,6 +41,9 @@ interface AppStore {
   notices: Notice[];
   attendance: Attendance[];
   salaryRecords: SalaryRecord[];
+  homework: Homework[];
+  remarks: TeacherRemark[];
+  documents: StudentDocument[];
   session: UserSession | null;
   addStudent: (s: Student) => void;
   updateStudent: (admNo: string, s: Partial<Student>) => void;
@@ -57,6 +66,18 @@ interface AppStore {
   markAttendance: (a: Attendance) => void;
   addSalaryRecord: (r: SalaryRecord) => void;
   updateSalaryRecord: (recordId: string, r: Partial<SalaryRecord>) => void;
+  // Homework CRUD
+  addHomework: (h: Homework) => void;
+  updateHomework: (homeworkId: string, h: Partial<Homework>) => void;
+  deleteHomework: (homeworkId: string) => void;
+  // Remarks CRUD
+  addRemark: (r: TeacherRemark) => void;
+  updateRemark: (remarkId: string, r: Partial<TeacherRemark>) => void;
+  deleteRemark: (remarkId: string) => void;
+  // Documents CRUD
+  addDocument: (d: StudentDocument) => void;
+  updateDocument: (docId: string, d: Partial<StudentDocument>) => void;
+  deleteDocument: (docId: string) => void;
   setSession: (s: UserSession | null) => void;
 }
 
@@ -75,6 +96,10 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [salaryRecords, setSalaryRecords] = useState<SalaryRecord[]>(
     SAMPLE_SALARY_RECORDS,
   );
+  const [homework, setHomework] = useState<Homework[]>(SAMPLE_HOMEWORK);
+  const [remarks, setRemarks] = useState<TeacherRemark[]>(SAMPLE_REMARKS);
+  const [documents, setDocuments] =
+    useState<StudentDocument[]>(SAMPLE_DOCUMENTS);
   const [session, setSessionState] = useState<UserSession | null>(() => {
     const inMemory = sessionStore.get();
     if (inMemory) return inMemory;
@@ -202,6 +227,34 @@ export function AppProvider({ children }: { children: ReactNode }) {
       prev.map((sr) => (sr.recordId === recordId ? { ...sr, ...r } : sr)),
     );
 
+  // Homework CRUD
+  const addHomework = (h: Homework) => setHomework((prev) => [h, ...prev]);
+  const updateHomework = (homeworkId: string, h: Partial<Homework>) =>
+    setHomework((prev) =>
+      prev.map((hw) => (hw.homeworkId === homeworkId ? { ...hw, ...h } : hw)),
+    );
+  const deleteHomework = (homeworkId: string) =>
+    setHomework((prev) => prev.filter((hw) => hw.homeworkId !== homeworkId));
+
+  // Remarks CRUD
+  const addRemark = (r: TeacherRemark) => setRemarks((prev) => [r, ...prev]);
+  const updateRemark = (remarkId: string, r: Partial<TeacherRemark>) =>
+    setRemarks((prev) =>
+      prev.map((rm) => (rm.remarkId === remarkId ? { ...rm, ...r } : rm)),
+    );
+  const deleteRemark = (remarkId: string) =>
+    setRemarks((prev) => prev.filter((rm) => rm.remarkId !== remarkId));
+
+  // Documents CRUD
+  const addDocument = (d: StudentDocument) =>
+    setDocuments((prev) => [d, ...prev]);
+  const updateDocument = (docId: string, d: Partial<StudentDocument>) =>
+    setDocuments((prev) =>
+      prev.map((doc) => (doc.docId === docId ? { ...doc, ...d } : doc)),
+    );
+  const deleteDocument = (docId: string) =>
+    setDocuments((prev) => prev.filter((doc) => doc.docId !== docId));
+
   return (
     <AppContext.Provider
       value={{
@@ -214,6 +267,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         notices,
         attendance,
         salaryRecords,
+        homework,
+        remarks,
+        documents,
         session,
         addStudent,
         updateStudent,
@@ -236,6 +292,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
         markAttendance,
         addSalaryRecord,
         updateSalaryRecord,
+        addHomework,
+        updateHomework,
+        deleteHomework,
+        addRemark,
+        updateRemark,
+        deleteRemark,
+        addDocument,
+        updateDocument,
+        deleteDocument,
         setSession: handleSetSession,
       }}
     >

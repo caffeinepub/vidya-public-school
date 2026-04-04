@@ -4,10 +4,13 @@ import type {
   Employee,
   Exam,
   FeePayment,
+  Homework,
   Notice,
   SalaryRecord,
   Student,
+  StudentDocument,
   StudentMark,
+  TeacherRemark,
 } from "../types";
 
 export const SAMPLE_CLASSES: ClassInfo[] = [
@@ -311,6 +314,41 @@ export const SAMPLE_MARKS: StudentMark[] = [
     grade: "A",
   },
   {
+    studentAdmissionNumber: "VPS2024001",
+    examId: "EXAM004",
+    subject: "Mathematics",
+    marks: 91,
+    grade: "A+",
+  },
+  {
+    studentAdmissionNumber: "VPS2024001",
+    examId: "EXAM004",
+    subject: "Science",
+    marks: 84,
+    grade: "A",
+  },
+  {
+    studentAdmissionNumber: "VPS2024001",
+    examId: "EXAM004",
+    subject: "English",
+    marks: 93,
+    grade: "A+",
+  },
+  {
+    studentAdmissionNumber: "VPS2024001",
+    examId: "EXAM004",
+    subject: "Hindi",
+    marks: 79,
+    grade: "B+",
+  },
+  {
+    studentAdmissionNumber: "VPS2024001",
+    examId: "EXAM004",
+    subject: "Social Studies",
+    marks: 88,
+    grade: "A",
+  },
+  {
     studentAdmissionNumber: "VPS2024002",
     examId: "EXAM001",
     subject: "Mathematics",
@@ -436,6 +474,69 @@ export const SAMPLE_ATTENDANCE: Attendance[] = [
     present: true,
   },
   {
+    studentAdmissionNumber: "VPS2024001",
+    className: "Class 10",
+    section: "A",
+    date: "2024-05-15",
+    present: true,
+  },
+  {
+    studentAdmissionNumber: "VPS2024001",
+    className: "Class 10",
+    section: "A",
+    date: "2024-05-16",
+    present: false,
+  },
+  {
+    studentAdmissionNumber: "VPS2024001",
+    className: "Class 10",
+    section: "A",
+    date: "2024-05-17",
+    present: true,
+  },
+  {
+    studentAdmissionNumber: "VPS2024001",
+    className: "Class 10",
+    section: "A",
+    date: "2024-05-20",
+    present: true,
+  },
+  {
+    studentAdmissionNumber: "VPS2024001",
+    className: "Class 10",
+    section: "A",
+    date: "2024-05-21",
+    present: true,
+  },
+  {
+    studentAdmissionNumber: "VPS2024001",
+    className: "Class 10",
+    section: "A",
+    date: "2024-05-22",
+    present: false,
+  },
+  {
+    studentAdmissionNumber: "VPS2024001",
+    className: "Class 10",
+    section: "A",
+    date: "2024-05-23",
+    present: true,
+  },
+  {
+    studentAdmissionNumber: "VPS2024001",
+    className: "Class 10",
+    section: "A",
+    date: "2024-05-24",
+    present: true,
+  },
+  {
+    studentAdmissionNumber: "VPS2024001",
+    className: "Class 10",
+    section: "A",
+    date: "2024-05-27",
+    present: true,
+  },
+  {
     studentAdmissionNumber: "VPS2024002",
     className: "Class 10",
     section: "A",
@@ -473,4 +574,157 @@ export const FEE_CHART_DATA = [
   { day: "Fri", amount: 18500 },
   { day: "Sat", amount: 7200 },
   { day: "Sun", amount: 3100 },
+];
+
+export const SAMPLE_HOMEWORK: Homework[] = [
+  {
+    homeworkId: "HW001",
+    className: "Class 10",
+    section: "A",
+    subject: "Mathematics",
+    title: "Chapter 3 Exercises",
+    description:
+      "Complete exercises 3.1 to 3.5 from the NCERT textbook. Show all working steps clearly. Submit in the fair notebook.",
+    dueDate: "2024-05-20",
+    postedBy: "Prof. Suresh Mathur",
+  },
+  {
+    homeworkId: "HW002",
+    className: "Class 10",
+    section: "A",
+    subject: "Science",
+    title: "Lab Report – Photosynthesis",
+    description:
+      "Write a 1-page lab report on the photosynthesis experiment conducted in class. Include aim, procedure, observations, and conclusion.",
+    dueDate: "2024-05-18",
+    postedBy: "Ms. Anjali Desai",
+  },
+  {
+    homeworkId: "HW003",
+    className: "Class 10",
+    section: "A",
+    subject: "English",
+    title: "Essay – My Ambition in Life",
+    description:
+      "Write a 300-word essay on 'My Ambition in Life'. Pay attention to structure: introduction, body, and conclusion. Focus on grammar and vocabulary.",
+    dueDate: "2024-05-22",
+    postedBy: "Ms. Priya Nair",
+  },
+  {
+    homeworkId: "HW004",
+    className: "Class 10",
+    section: "A",
+    subject: "Hindi",
+    title: "Kavita Lekhan",
+    description:
+      "Prakriti ki Sundarta vishay par 8-10 panktiyon ki ek kavita likhiye. Tukbandi ka dhyan rakhein.",
+    dueDate: "2024-05-19",
+    postedBy: "Mr. Ramesh Joshi",
+  },
+  {
+    homeworkId: "HW005",
+    className: "Class 10",
+    section: "A",
+    subject: "Social Studies",
+    title: "Map Work – Physical Features of India",
+    description:
+      "Mark and label the major rivers, mountain ranges, and plateaus of India on the outline map provided in your workbook.",
+    dueDate: "2024-05-21",
+    postedBy: "Mr. Anil Saxena",
+  },
+  {
+    homeworkId: "HW006",
+    className: "Class 9",
+    section: "A",
+    subject: "Mathematics",
+    title: "Polynomials Practice Sheet",
+    description:
+      "Solve all problems from the practice sheet distributed today. Focus on factorisation and division of polynomials.",
+    dueDate: "2024-05-20",
+    postedBy: "Prof. Suresh Mathur",
+  },
+];
+
+export const SAMPLE_REMARKS: TeacherRemark[] = [
+  {
+    remarkId: "RMK001",
+    studentAdmissionNumber: "VPS2024001",
+    term: "Term 1",
+    remarkText:
+      "Arjun is a hardworking and focused student. He shows excellent grasp in Mathematics and consistently performs above average. Needs to improve participation in class discussions and group activities.",
+    postedBy: "Prof. Suresh Mathur",
+    date: "2024-06-30",
+  },
+  {
+    remarkId: "RMK002",
+    studentAdmissionNumber: "VPS2024001",
+    term: "Term 2",
+    remarkText:
+      "Significant improvement in Science and English this term. Arjun has become more confident in class presentations. Encouraged to take part in the upcoming Science Exhibition. Keep up the excellent work!",
+    postedBy: "Dr. Sanjana Maurya",
+    date: "2024-11-30",
+  },
+  {
+    remarkId: "RMK003",
+    studentAdmissionNumber: "VPS2024002",
+    term: "Term 1",
+    remarkText:
+      "Priya is an outstanding student with exceptional analytical skills. She is a top performer across all subjects and a positive role model for the class. She is encouraged to mentor her peers.",
+    postedBy: "Prof. Suresh Mathur",
+    date: "2024-06-30",
+  },
+  {
+    remarkId: "RMK004",
+    studentAdmissionNumber: "VPS2024003",
+    term: "Term 1",
+    remarkText:
+      "Rohit is sincere and attentive in class. Needs to focus more on completing assignments on time. Parents are advised to monitor homework completion regularly at home.",
+    postedBy: "Ms. Anjali Desai",
+    date: "2024-06-30",
+  },
+];
+
+export const SAMPLE_DOCUMENTS: StudentDocument[] = [
+  {
+    docId: "DOC001",
+    studentAdmissionNumber: "VPS2024001",
+    title: "Student ID Card (2024-25)",
+    type: "ID Card",
+    dateIssued: "2024-04-10",
+  },
+  {
+    docId: "DOC002",
+    studentAdmissionNumber: "VPS2024001",
+    title: "Character Certificate",
+    type: "Character Certificate",
+    dateIssued: "2024-04-10",
+  },
+  {
+    docId: "DOC003",
+    studentAdmissionNumber: "VPS2024001",
+    title: "Unit Test 1 – Report Card",
+    type: "Report Card",
+    dateIssued: "2024-06-01",
+  },
+  {
+    docId: "DOC004",
+    studentAdmissionNumber: "VPS2024002",
+    title: "Student ID Card (2024-25)",
+    type: "ID Card",
+    dateIssued: "2024-04-10",
+  },
+  {
+    docId: "DOC005",
+    studentAdmissionNumber: "VPS2024003",
+    title: "Student ID Card (2024-25)",
+    type: "ID Card",
+    dateIssued: "2024-04-10",
+  },
+  {
+    docId: "DOC006",
+    studentAdmissionNumber: "VPS2024003",
+    title: "Transfer Certificate",
+    type: "TC",
+    dateIssued: "2024-12-15",
+  },
 ];
