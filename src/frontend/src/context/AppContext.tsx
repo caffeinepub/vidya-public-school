@@ -7,6 +7,7 @@ import {
   SAMPLE_EXAMS,
   SAMPLE_FEE_PAYMENTS,
   SAMPLE_HOMEWORK,
+  SAMPLE_HOMEWORK_SUBMISSIONS,
   SAMPLE_MARKS,
   SAMPLE_NOTICES,
   SAMPLE_REMARKS,
@@ -20,6 +21,7 @@ import type {
   Exam,
   FeePayment,
   Homework,
+  HomeworkSubmission,
   Notice,
   SalaryRecord,
   Student,
@@ -42,6 +44,7 @@ interface AppStore {
   attendance: Attendance[];
   salaryRecords: SalaryRecord[];
   homework: Homework[];
+  homeworkSubmissions: HomeworkSubmission[];
   remarks: TeacherRemark[];
   documents: StudentDocument[];
   session: UserSession | null;
@@ -70,6 +73,12 @@ interface AppStore {
   addHomework: (h: Homework) => void;
   updateHomework: (homeworkId: string, h: Partial<Homework>) => void;
   deleteHomework: (homeworkId: string) => void;
+  // HomeworkSubmission CRUD
+  addHomeworkSubmission: (s: HomeworkSubmission) => void;
+  updateHomeworkSubmission: (
+    submissionId: string,
+    s: Partial<HomeworkSubmission>,
+  ) => void;
   // Remarks CRUD
   addRemark: (r: TeacherRemark) => void;
   updateRemark: (remarkId: string, r: Partial<TeacherRemark>) => void;
@@ -97,6 +106,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     SAMPLE_SALARY_RECORDS,
   );
   const [homework, setHomework] = useState<Homework[]>(SAMPLE_HOMEWORK);
+  const [homeworkSubmissions, setHomeworkSubmissions] = useState<
+    HomeworkSubmission[]
+  >(SAMPLE_HOMEWORK_SUBMISSIONS);
   const [remarks, setRemarks] = useState<TeacherRemark[]>(SAMPLE_REMARKS);
   const [documents, setDocuments] =
     useState<StudentDocument[]>(SAMPLE_DOCUMENTS);
@@ -236,6 +248,19 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const deleteHomework = (homeworkId: string) =>
     setHomework((prev) => prev.filter((hw) => hw.homeworkId !== homeworkId));
 
+  // HomeworkSubmission CRUD
+  const addHomeworkSubmission = (s: HomeworkSubmission) =>
+    setHomeworkSubmissions((prev) => [...prev, s]);
+  const updateHomeworkSubmission = (
+    submissionId: string,
+    s: Partial<HomeworkSubmission>,
+  ) =>
+    setHomeworkSubmissions((prev) =>
+      prev.map((sub) =>
+        sub.submissionId === submissionId ? { ...sub, ...s } : sub,
+      ),
+    );
+
   // Remarks CRUD
   const addRemark = (r: TeacherRemark) => setRemarks((prev) => [r, ...prev]);
   const updateRemark = (remarkId: string, r: Partial<TeacherRemark>) =>
@@ -268,6 +293,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         attendance,
         salaryRecords,
         homework,
+        homeworkSubmissions,
         remarks,
         documents,
         session,
@@ -295,6 +321,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         addHomework,
         updateHomework,
         deleteHomework,
+        addHomeworkSubmission,
+        updateHomeworkSubmission,
         addRemark,
         updateRemark,
         deleteRemark,

@@ -5,6 +5,7 @@ import type {
   Exam,
   FeePayment,
   Homework,
+  HomeworkSubmission,
   Notice,
   SalaryRecord,
   Student,
@@ -726,5 +727,55 @@ export const SAMPLE_DOCUMENTS: StudentDocument[] = [
     title: "Transfer Certificate",
     type: "TC",
     dateIssued: "2024-12-15",
+  },
+];
+
+export const SAMPLE_HOMEWORK_SUBMISSIONS: HomeworkSubmission[] = [
+  {
+    submissionId: "SUB001",
+    homeworkId: "HW001",
+    studentAdmissionNumber: "VPS2024001",
+    submittedDate: "2024-05-19",
+    status: "graded",
+    note: "Completed all exercises with working shown.",
+    grade: "A",
+    teacherComment: "Well done! All steps clearly shown.",
+  },
+  {
+    submissionId: "SUB002",
+    homeworkId: "HW002",
+    studentAdmissionNumber: "VPS2024001",
+    status: "pending",
+  },
+  {
+    submissionId: "SUB003",
+    homeworkId: "HW003",
+    studentAdmissionNumber: "VPS2024001",
+    submittedDate: "2024-05-21",
+    status: "submitted",
+    note: "Essay submitted as requested.",
+  },
+  {
+    submissionId: "SUB004",
+    homeworkId: "HW001",
+    studentAdmissionNumber: "VPS2024002",
+    status: "pending",
+  },
+  {
+    submissionId: "SUB005",
+    homeworkId: "HW002",
+    studentAdmissionNumber: "VPS2024002",
+    submittedDate: "2024-05-17",
+    status: "submitted",
+    note: "Lab report attached.",
+  },
+  {
+    submissionId: "SUB006",
+    homeworkId: "HW001",
+    studentAdmissionNumber: "VPS2024003",
+    submittedDate: "2024-05-18",
+    status: "graded",
+    grade: "B+",
+    teacherComment: "Good attempt, but some steps missing.",
   },
 ];

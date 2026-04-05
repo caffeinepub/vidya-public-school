@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -25,8 +26,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 import { useApp } from "@/context/AppContext";
-import type { FeePayment } from "@/types";
+import type { FeePayment, HomeworkSubmission, StudentDocument } from "@/types";
 import {
   formatCurrency,
   formatDate,
@@ -101,7 +103,10 @@ export default function StudentPortal() {
     homework,
     remarks,
     documents,
+    homeworkSubmissions,
     addFeePayment,
+    addHomeworkSubmission,
+    updateHomeworkSubmission,
   } = useApp();
 
   const [activeSection, setActiveSection] = useState<Section>("overview");
@@ -114,6 +119,13 @@ export default function StudentPortal() {
 
   // Receipt preview
   const [receiptPreview, setReceiptPreview] = useState<FeePayment | null>(null);
+
+  // Document preview
+  const [docPreview, setDocPreview] = useState<StudentDocument | null>(null);
+
+  // Homework submission dialog
+  const [submitHwId, setSubmitHwId] = useState<string | null>(null);
+  const [submitNote, setSubmitNote] = useState("");
 
   // Results filter
   const [selectedExamId, setSelectedExamId] = useState<string>("all");
@@ -439,7 +451,8 @@ export default function StudentPortal() {
                     : "D";
         return (
           <div className="space-y-4">
-            <div className="flex flex-wrap items-center gap-3">
+            {/* Filter controls — hidden when printing */}
+            <div className="flex flex-wrap items-center gap-3 no-print">
               <Select value={selectedExamId} onValueChange={setSelectedExamId}>
                 <SelectTrigger className="w-52">
                   <SelectValue placeholder="Select Exam" />
@@ -468,7 +481,69 @@ export default function StudentPortal() {
               </Card>
             ) : (
               <>
-                <Card>
+                {/* Printable Report Card */}
+                <div
+                  id="print-report-card"
+                  className="border border-border rounded-lg p-6 bg-card"
+                >
+                  {/* Report Card Header */}
+                  <div className="flex items-center gap-3 mb-2">
+                    <img
+                      src="/assets/generated/vidya-school-logo-transparent.dim_120x120.png"
+                      alt="VPS"
+                      className="h-10 w-10"
+                    />
+                    <div>
+                      <div className="font-bold text-foreground text-base">
+                        Vidya Public School
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        473X+PGM, Gadarpur, Govindpur, Uttarakhand 263160
+                      </div>
+                    </div>
+                  </div>
+                  <Separator className="mb-3" />
+                  <div className="text-center mb-4">
+                    <h2 className="text-base font-bold uppercase tracking-wide text-foreground">
+                      Report Card
+                    </h2>
+                    {examForFiltered && (
+                      <p className="text-xs text-muted-foreground">
+                        {examForFiltered.name} —{" "}
+                        {formatDate(examForFiltered.date)}
+                      </p>
+                    )}
+                  </div>
+                  {/* Student Info */}
+                  <div className="grid grid-cols-3 gap-3 mb-4 text-sm">
+                    <div>
+                      <span className="text-xs text-muted-foreground block">
+                        Student Name
+                      </span>
+                      <span className="font-semibold text-foreground">
+                        {student.name}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-xs text-muted-foreground block">
+                        Admission No
+                      </span>
+                      <span className="font-semibold text-foreground">
+                        {student.admissionNumber}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="text-xs text-muted-foreground block">
+                        Class / Section
+                      </span>
+                      <span className="font-semibold text-foreground">
+                        {student.className} – {student.section}
+                      </span>
+                    </div>
+                  </div>
+                  <Separator className="mb-4" />
+
+                  {/* Marks Table */}
                   <div className="table-wrapper">
                     <Table>
                       <TableHeader>
@@ -520,39 +595,60 @@ export default function StudentPortal() {
                       </TableBody>
                     </Table>
                   </div>
-                </Card>
 
-                <div className="grid grid-cols-3 gap-4">
-                  <Card>
-                    <CardContent className="p-4 text-center">
-                      <div className="text-2xl font-bold">
+                  {/* Summary Cards */}
+                  <div className="grid grid-cols-3 gap-4 mt-4">
+                    <div className="border border-border rounded-lg p-4 text-center">
+                      <div className="text-xl font-bold text-foreground">
                         {totalMarksSum}/{maxMarksSum}
                       </div>
                       <div className="text-xs text-muted-foreground mt-1">
                         Total Marks
                       </div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4 text-center">
-                      <div className="text-2xl font-bold">{percentage}%</div>
+                    </div>
+                    <div className="border border-border rounded-lg p-4 text-center">
+                      <div className="text-xl font-bold text-foreground">
+                        {percentage}%
+                      </div>
                       <div className="text-xs text-muted-foreground mt-1">
                         Percentage
                       </div>
-                    </CardContent>
-                  </Card>
-                  <Card>
-                    <CardContent className="p-4 text-center">
+                    </div>
+                    <div className="border border-border rounded-lg p-4 text-center">
                       <div
-                        className={`text-2xl font-bold ${gradeColor(overallGrade).split(" ")[1]}`}
+                        className={`text-xl font-bold ${gradeColor(overallGrade).split(" ")[1]}`}
                       >
                         {overallGrade}
                       </div>
                       <div className="text-xs text-muted-foreground mt-1">
                         Overall Grade
                       </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                  </div>
+
+                  {/* Report Card Footer */}
+                  <Separator className="mt-6 mb-4" />
+                  <div className="flex justify-between items-end">
+                    <div>
+                      <div className="text-xs text-muted-foreground mb-6">
+                        Authorised Signatory
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Principal's Seal
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-xs text-muted-foreground mb-1">
+                        Academic Year
+                      </div>
+                      <div className="text-sm font-medium text-foreground">
+                        2024–2025
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-center text-xs text-muted-foreground mt-3">
+                    This is a computer-generated document.
+                  </div>
                 </div>
 
                 <div className="flex justify-end no-print">
@@ -644,11 +740,11 @@ export default function StudentPortal() {
                           </TableCell>
                           <TableCell>
                             <Badge
-                              className={
+                              className={`text-xs ${
                                 a.present
                                   ? "bg-green-50 text-green-700 border-green-200"
                                   : "bg-red-50 text-red-700 border-red-200"
-                              }
+                              }`}
                             >
                               {a.present ? "Present" : "Absent"}
                             </Badge>
@@ -670,33 +766,27 @@ export default function StudentPortal() {
             {classInfo && (
               <Card>
                 <CardHeader>
-                  <CardTitle className="text-sm">
-                    Fee Structure – {classInfo.className} {classInfo.section}
-                  </CardTitle>
+                  <CardTitle className="text-sm">Fee Structure</CardTitle>
                 </CardHeader>
-                <CardContent className="pb-5">
-                  <div className="grid grid-cols-3 gap-4 text-sm">
-                    <div>
-                      <span className="text-muted-foreground block text-xs mb-1">
-                        Tuition Fee
-                      </span>
-                      <span className="font-semibold">
+                <CardContent className="pt-0">
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between py-1.5 border-b border-border">
+                      <span className="text-muted-foreground">Tuition Fee</span>
+                      <span className="font-medium">
                         {formatCurrency(classInfo.feeStructure.tuition)}
                       </span>
                     </div>
-                    <div>
-                      <span className="text-muted-foreground block text-xs mb-1">
-                        Transport
+                    <div className="flex justify-between py-1.5 border-b border-border">
+                      <span className="text-muted-foreground">
+                        Transport Fee
                       </span>
-                      <span className="font-semibold">
+                      <span className="font-medium">
                         {formatCurrency(classInfo.feeStructure.transport)}
                       </span>
                     </div>
-                    <div>
-                      <span className="text-muted-foreground block text-xs mb-1">
-                        Exam Fees
-                      </span>
-                      <span className="font-semibold">
+                    <div className="flex justify-between py-1.5">
+                      <span className="text-muted-foreground">Exam Fees</span>
+                      <span className="font-medium">
                         {formatCurrency(classInfo.feeStructure.examFees)}
                       </span>
                     </div>
@@ -934,7 +1024,7 @@ export default function StudentPortal() {
                           Vidya Public School
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          473X+PGM, Govindpur, Uttarakhand 263160
+                          473X+PGM, Gadarpur, Govindpur, Uttarakhand 263160
                         </div>
                       </div>
                       <div className="ml-auto text-right">
@@ -1066,6 +1156,17 @@ export default function StudentPortal() {
                     new Date(new Date().getTime() + 3 * 86400000)
                       .toISOString()
                       .split("T")[0];
+
+                const mySub: HomeworkSubmission | undefined =
+                  homeworkSubmissions.find(
+                    (s) =>
+                      s.homeworkId === hw.homeworkId &&
+                      s.studentAdmissionNumber === admNo,
+                  );
+
+                const isSubmitted =
+                  mySub?.status === "submitted" || mySub?.status === "graded";
+
                 return (
                   <Card key={hw.homeworkId}>
                     <CardContent className="p-5">
@@ -1083,6 +1184,20 @@ export default function StudentPortal() {
                             Due Soon
                           </Badge>
                         )}
+                        {/* Submission status badge */}
+                        {mySub?.status === "graded" ? (
+                          <Badge className="text-xs bg-green-50 text-green-700 border-green-200">
+                            Graded{mySub.grade ? `: ${mySub.grade}` : ""}
+                          </Badge>
+                        ) : mySub?.status === "submitted" ? (
+                          <Badge className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+                            Submitted
+                          </Badge>
+                        ) : (
+                          <Badge className="text-xs bg-gray-50 text-gray-600 border-gray-200">
+                            Not Submitted
+                          </Badge>
+                        )}
                         <span className="ml-auto text-xs text-muted-foreground">
                           Due: {formatDate(hw.dueDate)}
                         </span>
@@ -1093,14 +1208,134 @@ export default function StudentPortal() {
                       <p className="text-sm text-muted-foreground leading-relaxed">
                         {hw.description}
                       </p>
-                      <div className="text-xs text-muted-foreground mt-3">
+                      <div className="text-xs text-muted-foreground mt-2">
                         Assigned by: {hw.postedBy}
+                      </div>
+
+                      {/* Teacher feedback (if graded) */}
+                      {mySub?.status === "graded" && mySub.teacherComment && (
+                        <div className="mt-3 p-3 rounded-lg bg-green-50 border border-green-200 text-sm">
+                          <div className="font-medium text-green-800 text-xs mb-1">
+                            Teacher's Feedback
+                          </div>
+                          <p className="text-green-700">
+                            {mySub.teacherComment}
+                          </p>
+                          {mySub.grade && (
+                            <div className="mt-1 text-xs font-semibold text-green-800">
+                              Grade: {mySub.grade}
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      {/* Submit button */}
+                      <div className="mt-3">
+                        {isSubmitted ? (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            disabled
+                            className="text-xs text-muted-foreground"
+                          >
+                            ✓ Submitted
+                          </Button>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs"
+                            onClick={() => setSubmitHwId(hw.homeworkId)}
+                            data-ocid="homework.submit_button"
+                          >
+                            Submit Homework
+                          </Button>
+                        )}
                       </div>
                     </CardContent>
                   </Card>
                 );
               })
             )}
+
+            {/* Submit Homework Dialog */}
+            <Dialog
+              open={!!submitHwId}
+              onOpenChange={(o) => {
+                if (!o) {
+                  setSubmitHwId(null);
+                  setSubmitNote("");
+                }
+              }}
+            >
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Submit Homework</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-3 py-2">
+                  <p className="text-sm text-muted-foreground">
+                    {homework.find((h) => h.homeworkId === submitHwId)?.title}
+                  </p>
+                  <div className="space-y-1.5">
+                    <Label>Note / Remarks (optional)</Label>
+                    <Textarea
+                      value={submitNote}
+                      onChange={(e) => setSubmitNote(e.target.value)}
+                      rows={3}
+                      placeholder="Any notes for your teacher..."
+                      data-ocid="homework.textarea"
+                    />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setSubmitHwId(null);
+                      setSubmitNote("");
+                    }}
+                    data-ocid="homework.cancel_button"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      if (!submitHwId) return;
+                      const existing = homeworkSubmissions.find(
+                        (s) =>
+                          s.homeworkId === submitHwId &&
+                          s.studentAdmissionNumber === admNo,
+                      );
+                      const submittedToday = new Date()
+                        .toISOString()
+                        .split("T")[0];
+                      if (existing) {
+                        updateHomeworkSubmission(existing.submissionId, {
+                          status: "submitted",
+                          submittedDate: submittedToday,
+                          note: submitNote,
+                        });
+                      } else {
+                        addHomeworkSubmission({
+                          submissionId: `SUB${Date.now()}`,
+                          homeworkId: submitHwId,
+                          studentAdmissionNumber: admNo,
+                          status: "submitted",
+                          submittedDate: submittedToday,
+                          note: submitNote,
+                        });
+                      }
+                      toast.success("Homework submitted successfully!");
+                      setSubmitHwId(null);
+                      setSubmitNote("");
+                    }}
+                    data-ocid="homework.submit_button"
+                  >
+                    Submit
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         );
 
@@ -1176,11 +1411,8 @@ export default function StudentPortal() {
                               variant="outline"
                               size="sm"
                               className="h-7 text-xs"
-                              onClick={() =>
-                                toast.success(
-                                  `${d.title} is ready for download.`,
-                                )
-                              }
+                              onClick={() => setDocPreview(d)}
+                              data-ocid="documents.open_modal_button"
                             >
                               <Download className="h-3 w-3 mr-1" /> Download
                             </Button>
@@ -1192,6 +1424,122 @@ export default function StudentPortal() {
                 </div>
               </Card>
             )}
+
+            {/* Document Preview Dialog */}
+            <Dialog
+              open={!!docPreview}
+              onOpenChange={(o) => !o && setDocPreview(null)}
+            >
+              <DialogContent className="max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Document Preview</DialogTitle>
+                </DialogHeader>
+                {docPreview && (
+                  <div
+                    className="border border-border rounded-lg p-5 text-sm"
+                    id="doc-preview-print"
+                  >
+                    {/* School header */}
+                    <div className="flex items-center gap-3 mb-4">
+                      <img
+                        src="/assets/generated/vidya-school-logo-transparent.dim_120x120.png"
+                        alt="VPS"
+                        className="h-10 w-10"
+                      />
+                      <div>
+                        <div className="font-bold text-foreground">
+                          Vidya Public School
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          473X+PGM, Gadarpur, Govindpur, Uttarakhand 263160
+                        </div>
+                      </div>
+                      <div className="ml-auto text-right">
+                        <div className="text-xs text-muted-foreground">
+                          Document No
+                        </div>
+                        <div className="font-mono font-semibold">
+                          {docPreview.docId}
+                        </div>
+                      </div>
+                    </div>
+                    <Separator className="mb-4" />
+                    {/* Document info grid */}
+                    <div className="grid grid-cols-2 gap-3 mb-4">
+                      <div>
+                        <span className="text-muted-foreground text-xs">
+                          Student
+                        </span>
+                        <div className="font-medium">{student.name}</div>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground text-xs">
+                          Admission No
+                        </span>
+                        <div className="font-medium">
+                          {student.admissionNumber}
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground text-xs">
+                          Class
+                        </span>
+                        <div className="font-medium">
+                          {student.className} – {student.section}
+                        </div>
+                      </div>
+                      <div>
+                        <span className="text-muted-foreground text-xs">
+                          Date Issued
+                        </span>
+                        <div className="font-medium">
+                          {formatDate(docPreview.dateIssued)}
+                        </div>
+                      </div>
+                      <div className="col-span-2">
+                        <span className="text-muted-foreground text-xs">
+                          Document Title
+                        </span>
+                        <div className="font-medium">{docPreview.title}</div>
+                      </div>
+                      <div className="col-span-2">
+                        <span className="text-muted-foreground text-xs">
+                          Document Type
+                        </span>
+                        <div>
+                          <Badge variant="outline" className="text-xs">
+                            {docPreview.type}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                    <Separator className="mb-4" />
+                    {/* Footer */}
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <div className="text-xs text-muted-foreground mb-6">
+                          Authorised Signatory
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Principal's Seal
+                        </div>
+                      </div>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => window.print()}
+                        data-ocid="documents.primary_button"
+                      >
+                        <Printer className="h-3.5 w-3.5 mr-2" /> Print
+                      </Button>
+                    </div>
+                    <div className="text-center text-xs text-muted-foreground mt-3">
+                      This is a computer-generated document.
+                    </div>
+                  </div>
+                )}
+              </DialogContent>
+            </Dialog>
           </div>
         );
 

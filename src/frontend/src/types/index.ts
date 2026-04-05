@@ -119,6 +119,17 @@ export interface Homework {
   postedBy: string;
 }
 
+export interface HomeworkSubmission {
+  submissionId: string;
+  homeworkId: string;
+  studentAdmissionNumber: string;
+  submittedDate?: string;
+  status: "pending" | "submitted" | "graded";
+  note?: string; // student's note on submission
+  grade?: string; // teacher-assigned grade
+  teacherComment?: string;
+}
+
 export interface TeacherRemark {
   remarkId: string;
   studentAdmissionNumber: string;

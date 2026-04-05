@@ -28,8 +28,8 @@ import {
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useApp } from "@/context/AppContext";
-import type { Homework } from "@/types";
-import { BookOpen, Edit, Plus, Trash2 } from "lucide-react";
+import type { Homework, HomeworkSubmission } from "@/types";
+import { BookOpen, CheckCircle, Edit, Plus, Trash2, Users } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 
@@ -48,9 +48,13 @@ export default function HomeworkManagePage() {
     homework,
     classes,
     session,
+    students,
+    homeworkSubmissions,
     addHomework,
     updateHomework,
     deleteHomework,
+    addHomeworkSubmission,
+    updateHomeworkSubmission,
   } = useApp();
 
   const canEdit =
@@ -65,6 +69,16 @@ export default function HomeworkManagePage() {
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<Omit<Homework, "homeworkId">>(EMPTY_FORM);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
+
+  // Submissions tracking
+  const [submissionsHw, setSubmissionsHw] = useState<string | null>(null);
+  const [editSub, setEditSub] = useState<{
+    admNo: string;
+    submissionId: string | null;
+    status: HomeworkSubmission["status"];
+    grade: string;
+    comment: string;
+  } | null>(null);
 
   const uniqueClasses = Array.from(
     new Set(classes.map((c) => c.className)),
@@ -141,6 +155,76 @@ export default function HomeworkManagePage() {
     deleteHomework(id);
     setDeleteConfirm(null);
     toast.success("Homework deleted.");
+  };
+
+  // Submissions dialog helpers
+  const selectedHw = homework.find((h) => h.homeworkId === submissionsHw);
+  const classStudents = selectedHw
+    ? students.filter(
+        (s) =>
+          s.className === selectedHw.className &&
+          s.section === selectedHw.section,
+      )
+    : [];
+  const submissionsForHw = homeworkSubmissions.filter(
+    (s) => s.homeworkId === submissionsHw,
+  );
+
+  const openEditSub = (admNo: string) => {
+    const existing = submissionsForHw.find(
+      (s) => s.studentAdmissionNumber === admNo,
+    );
+    setEditSub({
+      admNo,
+      submissionId: existing?.submissionId ?? null,
+      status: existing?.status ?? "pending",
+      grade: existing?.grade ?? "",
+      comment: existing?.teacherComment ?? "",
+    });
+  };
+
+  const handleSaveSub = () => {
+    if (!editSub || !submissionsHw) return;
+    const today = new Date().toISOString().split("T")[0];
+    if (editSub.submissionId) {
+      updateHomeworkSubmission(editSub.submissionId, {
+        status: editSub.status,
+        grade: editSub.grade || undefined,
+        teacherComment: editSub.comment || undefined,
+      });
+    } else {
+      addHomeworkSubmission({
+        submissionId: `SUB${Date.now()}`,
+        homeworkId: submissionsHw,
+        studentAdmissionNumber: editSub.admNo,
+        status: editSub.status,
+        submittedDate: editSub.status !== "pending" ? today : undefined,
+        grade: editSub.grade || undefined,
+        teacherComment: editSub.comment || undefined,
+      });
+    }
+    toast.success("Submission updated.");
+    setEditSub(null);
+  };
+
+  const statusBadge = (status: HomeworkSubmission["status"] | undefined) => {
+    if (status === "graded")
+      return (
+        <Badge className="text-xs bg-green-50 text-green-700 border-green-200">
+          <CheckCircle className="h-3 w-3 mr-1" /> Graded
+        </Badge>
+      );
+    if (status === "submitted")
+      return (
+        <Badge className="text-xs bg-blue-50 text-blue-700 border-blue-200">
+          Submitted
+        </Badge>
+      );
+    return (
+      <Badge className="text-xs bg-gray-50 text-gray-600 border-gray-200">
+        Pending
+      </Badge>
+    );
   };
 
   return (
@@ -280,7 +364,17 @@ export default function HomeworkManagePage() {
                             <Button
                               size="sm"
                               variant="outline"
+                              onClick={() => setSubmissionsHw(hw.homeworkId)}
+                              title="View Submissions"
+                              data-ocid="homework.open_modal_button"
+                            >
+                              <Users className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
                               onClick={() => openEdit(hw)}
+                              data-ocid="homework.edit_button"
                             >
                               <Edit className="h-3.5 w-3.5" />
                             </Button>
@@ -290,6 +384,7 @@ export default function HomeworkManagePage() {
                                 variant="outline"
                                 className="text-destructive hover:bg-destructive/10"
                                 onClick={() => setDeleteConfirm(hw.homeworkId)}
+                                data-ocid="homework.delete_button"
                               >
                                 <Trash2 className="h-3.5 w-3.5" />
                               </Button>
@@ -457,6 +552,167 @@ export default function HomeworkManagePage() {
             >
               Delete
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Submissions Tracker Dialog */}
+      <Dialog
+        open={!!submissionsHw}
+        onOpenChange={(o) => {
+          if (!o) {
+            setSubmissionsHw(null);
+            setEditSub(null);
+          }
+        }}
+      >
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>
+              Submission Tracker — {selectedHw?.title ?? ""}
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-xs text-muted-foreground -mt-1">
+            {selectedHw?.className} – {selectedHw?.section} &bull;{" "}
+            {selectedHw?.subject} &bull; Due: {selectedHw?.dueDate}
+          </p>
+
+          {classStudents.length === 0 ? (
+            <div className="py-8 text-center text-muted-foreground text-sm">
+              No students found for this class/section.
+            </div>
+          ) : (
+            <div className="overflow-x-auto max-h-80 overflow-y-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead>Student</TableHead>
+                    <TableHead>Adm. No</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Grade</TableHead>
+                    <TableHead className="text-right">Action</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {classStudents.map((st) => {
+                    const sub = submissionsForHw.find(
+                      (s) => s.studentAdmissionNumber === st.admissionNumber,
+                    );
+                    return (
+                      <TableRow key={st.admissionNumber}>
+                        <TableCell className="font-medium">{st.name}</TableCell>
+                        <TableCell className="text-muted-foreground text-xs">
+                          {st.admissionNumber}
+                        </TableCell>
+                        <TableCell>{statusBadge(sub?.status)}</TableCell>
+                        <TableCell className="text-sm">
+                          {sub?.grade ?? "—"}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="text-xs"
+                            onClick={() => openEditSub(st.admissionNumber)}
+                          >
+                            Update
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => {
+                setSubmissionsHw(null);
+                setEditSub(null);
+              }}
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Submission Sub-Dialog */}
+      <Dialog open={!!editSub} onOpenChange={(o) => !o && setEditSub(null)}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Update Submission</DialogTitle>
+          </DialogHeader>
+          {editSub && (
+            <div className="space-y-3 py-2">
+              <div className="text-xs text-muted-foreground">
+                Student:{" "}
+                <span className="font-medium text-foreground">
+                  {
+                    students.find((s) => s.admissionNumber === editSub.admNo)
+                      ?.name
+                  }
+                </span>
+              </div>
+              <div className="space-y-1.5">
+                <Label>Status</Label>
+                <Select
+                  value={editSub.status}
+                  onValueChange={(v) =>
+                    setEditSub((p) =>
+                      p
+                        ? { ...p, status: v as HomeworkSubmission["status"] }
+                        : null,
+                    )
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="submitted">Submitted</SelectItem>
+                    <SelectItem value="graded">Graded</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {editSub.status === "graded" && (
+                <div className="space-y-1.5">
+                  <Label>Grade</Label>
+                  <Input
+                    value={editSub.grade}
+                    onChange={(e) =>
+                      setEditSub((p) =>
+                        p ? { ...p, grade: e.target.value } : null,
+                      )
+                    }
+                    placeholder="e.g. A, B+, 85/100"
+                  />
+                </div>
+              )}
+              <div className="space-y-1.5">
+                <Label>Teacher Comment (optional)</Label>
+                <Textarea
+                  value={editSub.comment}
+                  onChange={(e) =>
+                    setEditSub((p) =>
+                      p ? { ...p, comment: e.target.value } : null,
+                    )
+                  }
+                  rows={3}
+                  placeholder="Feedback for the student..."
+                />
+              </div>
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditSub(null)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveSub}>Save</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
